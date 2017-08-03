@@ -6,7 +6,7 @@ This project extracts the graphics for the DOS game Isle of the Dead.
 
 ### Prerequisites
 
-You need Python 2.7 to run this.
+You need Python 3.6 or greater to run this.
 
 ### Installing
 
@@ -16,7 +16,8 @@ Then run:
 
     pip install -r requirements.txt
 
-On Windows, pip is usually found at C:\Python27\Scripts .
+The pip program is found in the Scripts subfolder of your Python install path.
+You may need to run it from a command prompt running as administractor.
 
 ## License
 
