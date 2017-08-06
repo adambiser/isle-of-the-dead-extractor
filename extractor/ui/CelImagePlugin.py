@@ -1,11 +1,12 @@
 #
-# Handles CEL graphic files used by the game Isle of the Dead.
+# CEL file handler for Pillow.
 #
 
 from PIL import Image,ImageFile,ImagePalette
 import os
 
 class CelImageFile(ImageFile.ImageFile):
+    """Image plugin for CEL graphic files used by the game Isle of the Dead."""
     format = "CEL"
     format_description = "CEL raster image"
     TOP = 0
@@ -18,6 +19,7 @@ class CelImageFile(ImageFile.ImageFile):
         self.mode = 'P'
         data = self.fp.read(2)
         if data == b'\x19\x91':
+            # This format includes the size and palette.
             width = int.from_bytes(self.fp.read(2), byteorder='little', signed=False)
             height = int.from_bytes(self.fp.read(2), byteorder='little', signed=False)
             self.fp.seek(0x20)
@@ -33,10 +35,19 @@ class CelImageFile(ImageFile.ImageFile):
             self.tile = [('raw', (0, 0) + self.size, 0, (CelImageFile.LEFT))]
 
     def loadvgapalette(self, fp):
+        """
+        Loads the palette from the given file pointer.
+        This can be either within the CEL file iteself or from an
+        external file.
+        """
         pal = [x * 4 for x in fp.read(768)]
         self.palette = ImagePalette.raw(None, pal[0::3] + pal[1::3] + pal[2::3])
 
     def loadpalette(self):
+        """
+        Loads the palette from an external file.
+        PALETTE.PAL must exist in the same folder as the CEL file.
+        """
         # There should be a PALETTE.PAL file in the same folder as the image file.
         palfile = os.path.join(os.path.dirname(self.filename), 'PALETTE.PAL')
         if not os.path.isfile(palfile):
@@ -45,8 +56,11 @@ class CelImageFile(ImageFile.ImageFile):
             self.loadvgapalette(f)
 
     def load(self):
+        """Loads the image data."""
         if self.tile is None:
             raise IOError("Cannot load this image")
+        if not self.tile:
+            return
         decoder_name, extents, offset, orientation = self.tile[0]
         self.im = Image.core.new(self.mode, self.size)
         self.fp.seek(offset)
@@ -54,6 +68,7 @@ class CelImageFile(ImageFile.ImageFile):
         if orientation == CelImageFile.LEFT:
             data = bytes([x for y in [data[z::self.size[0]] for z in range(self.size[1])] for x in y])
         self.frombytes(data)
+        self.tile = []
 
 #
 # Register

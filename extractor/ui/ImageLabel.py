@@ -1,12 +1,26 @@
+#
+# A widget to view images.
+#
+
 import tkinter.tix as tix
 import PIL as pil
 from PIL import ImageTk
 
 class ImageLabel(tix.Label):
+    """
+    A widget that displays an image that scales to fill the widget area
+    while maintaining the correct aspect ratio.
+
+    Also supports animation for multi-frame formats.
+
+    Variables that can be traced:
+    * currentframe - contains a number from 0 to n_frames or -1 if no image is displayed
+    * n_frames - the number of frames in the image.
+    """
+    
     def __init__(self, master=None, cnf={}, **kw):
         tix.Label.__init__(self, master, cnf, **kw)
         self.config(borderwidth=0)
-        self.original = None
         self.animating = False
         self.loop_animation = False
         self.animation_speed = None
@@ -22,17 +36,17 @@ class ImageLabel(tix.Label):
         self.animation_speed = None
         self.images = None
         # Load image.
-        self.original = pil.Image.open(filename)
+        original = pil.Image.open(filename)
         try:
-            n_frames = self.original.n_frames
-            # FLIC animation always has an extra "ring" frame for looping.
-            if type(self.original) is pil.FliImagePlugin.FliImageFile:
+            n_frames = original.n_frames
+            # FLIC animation always has an extra "ring" frame at the end for looping.
+            if type(original) is pil.FliImagePlugin.FliImageFile:
                 n_frames -= 1
             self.n_frames.set(n_frames)
         except AttributeError:
             self.n_frames.set(1)
         try:
-            self.animation_speed = self.original.info.get('duration')
+            self.animation_speed = original.info.get('duration')
             if not self.animation_speed is None:
                 self.animation_speed = int(self.animation_speed)
         except AttributeError:
@@ -43,15 +57,15 @@ class ImageLabel(tix.Label):
         self.currentframe.set(-1) # set invalid to force onframechanged to fire.
         self.images = []
         for x in range(self.n_frames.get()):
-            self.original.seek(x)
-            self.original.load()
-            self.images.append(self.original.copy())
+            original.seek(x)
+            original.load()
+            self.images.append(original.copy())
         # Load first frame.
         self.currentframe.set(0)
 
     def _onframechanged(self, *args):
-        if self.original is None\
-           or self.images is None\
+        if self.images is None\
+           or not self.images\
            or self.currentframe.get() == -1:
             self.config(image=None)
             return
