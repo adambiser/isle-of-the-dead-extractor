@@ -34,6 +34,7 @@ class ImageLabel(tix.Label):
         self.animating.trace("w", self._onanimatingchanged)
 
     def open(self, filename):
+        """Opens an image file and preloads its frame(s)."""
         # Reset values
         self.currentframe.set(-1) # set invalid to force onframechanged to fire.
         self.config(image=None)
@@ -69,6 +70,7 @@ class ImageLabel(tix.Label):
         self.currentframe.set(0)
 
     def _onframechanged(self, *args):
+        """Fires when currentframe changes. Displays the image."""
         if self.currentframe.get() == -1:
             return
         if self.imagesize is None:
@@ -83,6 +85,7 @@ class ImageLabel(tix.Label):
         self.config(image=self.photoimage)
 
     def _resize(self, event):
+        """Fires when the widget resizes. Calculates an aspect-corrected scale and size for the images."""
         if self.currentframe.get() == -1:
             return
         currentimage = self.frames[self.currentframe.get()]
