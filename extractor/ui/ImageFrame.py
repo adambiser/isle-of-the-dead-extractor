@@ -2,6 +2,7 @@
 # A widget to view images complete with navigation buttons, etc.
 #
 
+from .Resources import Resources
 import tkinter.tix as tix
 from .ImageLabel import ImageLabel
 
@@ -25,17 +26,31 @@ class ImageFrame(tix.Frame):
                         ipady=0)
         self.image.currentframe.trace("w", lambda *args: self._onframechanged(self.image.currentframe.get()))
         self.image.n_frames.trace("w", lambda *args: self._onframecountchanged(self.image.n_frames.get()))
+        self.image.animating.trace("w", lambda *args: self._onanimating(self.image.animating.get()))
+        # Prepare tooltip balloon.
+        self.tooltip = tix.Balloon(master)
+        for sub in self.tooltip.subwidgets_all():
+            sub.config(background='#ffffe1')
+        self.tooltip.subwidget('label')['image'] = tix.BitmapImage()
         # Buttons
-        self.backbutton = tix.Button(self, text="Prev", height=5, command=lambda: self._navigate(-1))
+        self.backbutton = tix.Button(self, text='Backward', command=lambda: self._navigate(-1))
+        self.backbutton.image = Resources.getimage('backward.png')
+        self.backbutton.config(image=self.backbutton.image)
         self.backbutton.grid(row=1,
                              column=0,
                              sticky='news',
                              )
-        self.playbutton = tix.Button(self, text='Play', height=5, command=lambda: self.image.animating.set(not self.image.animating.get()))
+        self.tooltip.bind_widget(self.backbutton, balloonmsg='Go back 1 frame')
+        self.playbutton = tix.Button(self, text='Play', command=lambda: self.image.animating.set(not self.image.animating.get()))
+        self.playbutton.image = Resources.getimage('play.png')
+        self.playbutton.config(image=self.playbutton.image)
         self.playbutton.grid(row=2,
                              column=0,
                              )
-        self.forwardbutton = tix.Button(self, text="Next", height=5, command=lambda: self._navigate(1))
+        self.tooltip.bind_widget(self.playbutton, balloonmsg='Play animation')
+        self.forwardbutton = tix.Button(self, text="Forward", command=lambda: self._navigate(1))
+        self.forwardbutton.image = Resources.getimage('forward.png')
+        self.forwardbutton.config(image=self.forwardbutton.image)
         self.forwardbutton.grid(row=1,
                                 column=2,
                                 sticky='news',
@@ -75,8 +90,7 @@ class ImageFrame(tix.Frame):
     def open(self, filename):
         self.image.open(filename)
 
-    def start_animation(self):
-        self.image.start_animation()
-
-    def stop_animation(self):
-        self.image.stop_animation()
+    def _onanimating(self, animating):
+        self.playbutton.image = Resources.getimage('stop.png' if animating else 'play.png')
+        self.playbutton.config(image=self.playbutton.image)
+        self.tooltip.bind_widget(self.playbutton, balloonmsg=('Stop' if animating else 'Play') + ' animation')
