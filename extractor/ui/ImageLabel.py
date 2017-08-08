@@ -22,7 +22,7 @@ class ImageLabel(tix.Label):
     def __init__(self, master=None, cnf={}, **kw):
         tix.Label.__init__(self, master, cnf, **kw)
         self.config(borderwidth=0)
-        self.config(background="black")
+        self.config(background="#333")
         self.animating = tix.BooleanVar(value=False)
         self.animation_speed = None
         self.frames = None
