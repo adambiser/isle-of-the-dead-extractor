@@ -37,11 +37,14 @@ class ImageLabel(tix.Label):
         """Opens an image file and preloads its frame(s)."""
         # Reset values
         self.currentframe.set(-1) # set invalid to force onframechanged to fire.
-        self.config(image=None)
+        self.n_frames.set(0)
+        self.config(image=[])
         self.animating.set(False)
         self.animation_speed = None
         self.frames = None
         self.imagesize = None
+        if filename is None:
+            return
         # Load image.
         original = pil.Image.open(filename)
         try:
