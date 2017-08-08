@@ -22,3 +22,7 @@ You may need to run it from a command prompt running as administractor.
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgements
+
+* [Kenney.nl](https://opengameart.org/content/game-icons) for the button icons. (CC0 License)
