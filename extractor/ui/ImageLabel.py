@@ -16,25 +16,31 @@ class ImageLabel(tix.Label):
     Variables that can be traced:
     * currentframe - contains a number from 0 to n_frames or -1 if no image is displayed
     * n_frames - the number of frames in the image.
+    * animating - the current animation state.
     """
     
     def __init__(self, master=None, cnf={}, **kw):
         tix.Label.__init__(self, master, cnf, **kw)
         self.config(borderwidth=0)
-        self.animating = False
-        self.loop_animation = False
+        self.config(background="black")
+        self.animating = tix.BooleanVar(value=False)
         self.animation_speed = None
-        self.images = None
+        self.frames = None
+        self.imagesize = None
         self.currentframe = tix.IntVar(value=-1)
         self.n_frames = tix.IntVar(value=0)
         self.bind("<Configure>", self._resize)
         self.currentframe.trace("w", self._onframechanged)
+        self.animating.trace("w", self._onanimatingchanged)
 
     def open(self, filename):
         # Reset values
-        self.animating = False
+        self.currentframe.set(-1) # set invalid to force onframechanged to fire.
+        self.config(image=None)
+        self.animating.set(False)
         self.animation_speed = None
-        self.images = None
+        self.frames = None
+        self.imagesize = None
         # Load image.
         original = pil.Image.open(filename)
         try:
@@ -53,56 +59,48 @@ class ImageLabel(tix.Label):
             pass
         if self.animation_speed is None:
             self.animation_speed = 100
-        # Preload all image frames.
-        self.currentframe.set(-1) # set invalid to force onframechanged to fire.
-        self.images = []
+        # Preload all frames.
+        self.frames = []
         for x in range(self.n_frames.get()):
             original.seek(x)
             original.load()
-            self.images.append(original.copy())
+            self.frames.append(original.copy())
         # Load first frame.
         self.currentframe.set(0)
 
     def _onframechanged(self, *args):
-        if self.images is None\
-           or not self.images\
-           or self.currentframe.get() == -1:
-            self.config(image=None)
+        if self.currentframe.get() == -1:
             return
-        new_size = (self.winfo_width(), self.winfo_height())
-        # Widget size is 1,1 until displayed. This can cause a 0 height
-        # image, which is not allowed. Just skip until later.
-        if new_size == (1,1):
-            self.config(image=None)
+        if self.imagesize is None:
+            # _resize calls this method again so just return after calling it.
+            self._resize([])
             return
-        currentimage = self.images[self.currentframe.get()]
-        old_size = currentimage.size
-        imagescale = min(new_size[0] / float(old_size[0]), new_size[1] / float(old_size[1]))
-        new_size = (int(old_size[0] * imagescale), int(old_size[1] * imagescale))
-        image_filter = pil.Image.NEAREST if imagescale >= 1 else pil.Image.BICUBIC
-        self.photoimage = pil.ImageTk.PhotoImage(currentimage.resize(new_size, image_filter)) # keep a reference!
+        w,h = self.imagesize
+        if w == 0 or h == 0:
+            return
+        currentimage = self.frames[self.currentframe.get()]
+        self.photoimage = pil.ImageTk.PhotoImage(currentimage.resize(self.imagesize, self.imagefilter)) # keep a reference!
         self.config(image=self.photoimage)
 
     def _resize(self, event):
+        if self.currentframe.get() == -1:
+            return
+        currentimage = self.frames[self.currentframe.get()]
+        w,h = currentimage.size
+        imagescale = min(self.winfo_width() / float(w), self.winfo_height() / float(h))
+        self.imagefilter = pil.Image.NEAREST if imagescale >= 1 else pil.Image.BICUBIC
+        self.imagesize = (int(w * imagescale), int(h * imagescale))
         self._onframechanged()
 
     def _animate(self, index):
-        if not self.animating:
+        if not self.animating.get():
             return
         if index >= self.n_frames.get():
-            if self.loop_animation:
-                index = 0
-            else:
-                self.stop_animation()
-                return
+            self.animating.set(False)
+            return
         self.currentframe.set(index)
         self.after(self.animation_speed, self._animate, index + 1)
 
-    def start_animation(self):
-        if self.n_frames.get() <= 1:
-            return
-        self.animating = True
-        self.after(0, self._animate, 0)
-
-    def stop_animation(self):
-        self.animating = False
+    def _onanimatingchanged(self, *args):
+        if self.animating.get():
+            self.after(0, self._animate, 0)
