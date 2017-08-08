@@ -106,4 +106,8 @@ class ImageLabel(tix.Label):
 
     def _onanimatingchanged(self, *args):
         if self.animating.get():
-            self.after(0, self._animate, 0)
+            currentframe = self.currentframe.get()
+            if currentframe == self.n_frames.get() - 1:
+                self.after(0, self._animate, 0)
+            else:
+                self.after(0, self._animate, currentframe)
