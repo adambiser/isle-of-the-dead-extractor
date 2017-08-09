@@ -17,8 +17,8 @@ class MainApplication(tix.Tk):
         # Treeview
         self.tree = ttk.Treeview(self)
         self.tree.heading('#0', text='Files')
-        self.tree.bind('<<TreeviewSelect>>', self._ontreeviewselect)
-        self.tree.bind('<Double-Button-1>', self._playanimation)
+        self.tree.bind('<<TreeviewSelect>>', lambda *args: self._ontreeviewselect())
+        self.tree.bind('<Double-Button-1>', lambda *args: self._playanimation())
         self.tree.pack(side='left', fill='y')
         # Image viewer
         self.imageviewer = ImageFrame(self)
@@ -45,14 +45,14 @@ class MainApplication(tix.Tk):
         self.settings.save()
         self.destroy()
 
-    def _ontreeviewselect(self, event):
+    def _ontreeviewselect(self):
         selectedpath = os.path.join(self.gamefolder, self.tree.focus())
         if os.path.isfile(selectedpath):
             self.imageviewer.open(selectedpath)
         else:
             self.imageviewer.clear()
 
-    def _playanimation(self, event):
+    def _playanimation(self):
         self.imageviewer.toggleanimation()
 
     def _centerwindow(self, width, height):
