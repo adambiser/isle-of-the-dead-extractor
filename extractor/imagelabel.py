@@ -91,7 +91,7 @@ class ImageLabel(tix.Label):
         self.photoimage = pil.ImageTk.PhotoImage(currentimage.resize(self.imagesize, self.imagefilter)) # keep a reference!
         self.config(image=self.photoimage)
 
-    def _resize(self, event):
+    def _resize(self, *args):
         """Fires when the widget resizes. Calculates an aspect-corrected scale and size for the images."""
         if self.currentframe.get() == -1:
             return
