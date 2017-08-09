@@ -2,42 +2,43 @@
 # CEL file handler for Pillow.
 #
 
-from PIL import Image,ImageFile,ImagePalette
+from PIL import Image, ImageFile, ImagePalette
 import os
+
 
 class CelImageFile(ImageFile.ImageFile):
     """Image plugin for CEL graphic files used by the game Isle of the Dead."""
     format = "CEL"
     format_description = "CEL raster image"
     TOP = 0
-    LEFT = 1 # Requires a square image to work correctly.
+    LEFT = 1  # Requires a square image to work correctly.
 
     def _open(self):
         # Must have .cel as the extension.
-        if os.path.splitext(self.filename)[1].lower() != '.cel':
+        if os.path.splitext(self.filename)[1].lower() != ".cel":
             raise SyntaxError("not a CEL file")
-        self.mode = 'P'
+        self.mode = "P"
         data = self.fp.read(2)
-        if data == b'\x19\x91':
+        if data == b"\x19\x91":
             # This format includes the size and palette.
-            width = int.from_bytes(self.fp.read(2), byteorder='little', signed=False)
-            height = int.from_bytes(self.fp.read(2), byteorder='little', signed=False)
+            width = int.from_bytes(self.fp.read(2), byteorder="little", signed=False)
+            height = int.from_bytes(self.fp.read(2), byteorder="little", signed=False)
             self.fp.seek(0x20)
             self.loadvgapalette(self.fp)
             self.size = (width, height)
-            self.tile = [('raw', (0, 0) + self.size, 0x320, (CelImageFile.TOP))]
+            self.tile = [("raw", (0, 0) + self.size, 0x320, CelImageFile.TOP)]
         else:
             # This format must have a file size of 4096 (64x64).
             if os.stat(self.filename).st_size != 4096:
                 raise SyntaxError("not a CEL file")
             self.loadpalette()
             self.size = (64, 64)
-            self.tile = [('raw', (0, 0) + self.size, 0, (CelImageFile.LEFT))]
+            self.tile = [("raw", (0, 0) + self.size, 0, CelImageFile.LEFT)]
 
     def loadvgapalette(self, fp):
         """
         Loads the palette from the given file pointer.
-        This can be either within the CEL file iteself or from an
+        This can be either within the CEL file itself or from an
         external file.
         """
         pal = [x * 4 for x in fp.read(768)]
@@ -49,10 +50,10 @@ class CelImageFile(ImageFile.ImageFile):
         PALETTE.PAL must exist in the same folder as the CEL file.
         """
         # There should be a PALETTE.PAL file in the same folder as the image file.
-        palfile = os.path.join(os.path.dirname(self.filename), 'PALETTE.PAL')
+        palfile = os.path.join(os.path.dirname(self.filename), "PALETTE.PAL")
         if not os.path.isfile(palfile):
             raise SyntaxError("could not find palette for CEL file")
-        with open(palfile, 'rb') as f:
+        with open(palfile, "rb") as f:
             self.loadvgapalette(f)
 
     def load(self):
@@ -70,9 +71,10 @@ class CelImageFile(ImageFile.ImageFile):
         self.frombytes(data)
         self.tile = []
 
+
 #
 # Register
 #
 
 Image.register_open(CelImageFile.format, CelImageFile)
-Image.register_extension(CelImageFile.format, '.cel')
+Image.register_extension(CelImageFile.format, ".cel")
