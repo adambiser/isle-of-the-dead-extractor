@@ -2,13 +2,15 @@ import json
 import os
 import tkinter as tk
 
+
 def _get_verify_dir(settings, name, default_path):
     path = settings.get(name, default_path)
     if path is not None and os.path.isdir(path):
         return path
     return default_path
 
-class Settings():
+
+class Settings:
     CONFIG_FILE = 'config.json'
 
     def __init__(self):
@@ -29,7 +31,7 @@ class Settings():
         settings = {
             'gamefolder': self.gamefolder.get(),
             'exportfolder': self.exportfolder.get()
-            }
+        }
         return settings
 
     def _fromdict(self, settings):
