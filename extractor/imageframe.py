@@ -19,15 +19,15 @@ class ImageFrame(tix.Frame):
     def __init__(self, master=None, **options):
         tix.Frame.__init__(self, master, options)
         self.config(borderwidth=0)
-        self.image = ImageLabel(self)
-        self.image.grid(row=0,
-                        column=0,
-                        columnspan=3,
-                        sticky='news',
-                        )
-        self.image.currentframe.trace("w", lambda *args: self._onframechanged())
-        self.image.n_frames.trace("w", lambda *args: self._onframecountchanged())
-        self.image.animating.trace("w", lambda *args: self._onanimating())
+        self.imageview = ImageLabel(self)
+        self.imageview.grid(row=0,
+                            column=0,
+                            columnspan=3,
+                            sticky='news',
+                            )
+        self.imageview.currentframe.trace("w", lambda *args: self._onframechanged())
+        self.imageview.n_frames.trace("w", lambda *args: self._onframecountchanged())
+        self.imageview.animating.trace("w", lambda *args: self._onanimating())
         self.master.bind("<Key>", self._onkey)
         # Prepare tooltip balloon.
         self.tooltip = tix.Balloon(self)
@@ -73,36 +73,40 @@ class ImageFrame(tix.Frame):
         self.frameinfo = tix.StringVar(value='')
         self.infolabel = tix.Label(self, textvariable=self.frameinfo)
         self.infolabel.grid(row=1,column=2)
+        # Image options
+        self.repeatcheckbox = tix.Checkbutton(self, text='Repeat', variable=self.imageview.wrapanimation)
+        self.repeatcheckbox.grid(row=1, column=0)
         # Configure grid sizing.
         self.grid_rowconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=0)
         self.grid_columnconfigure(0, weight=1, uniform='side')
         self.grid_columnconfigure(1, weight=0)
         self.grid_columnconfigure(2, weight=1, uniform='side')
+        # Force these event handlers to run.
         self._onframechanged()
         self._onframecountchanged()
 
     def open(self, filename):
-        self.image.open(filename)
+        self.imageview.open(filename)
 
     def clear(self):
-        self.image.open(None)
+        self.imageview.open(None)
 
     @property
     def currentframe(self):
-        return self.image.currentframe.get()
+        return self.imageview.currentframe.get()
 
     @currentframe.setter
     def currentframe(self, value):
-        self.image.currentframe.set(value)
+        self.imageview.currentframe.set(value)
 
     @property
     def framecount(self):
-        return self.image.n_frames.get()
+        return self.imageview.n_frames.get()
 
     @property
     def isanimating(self):
-        return self.image.animating.get()
+        return self.imageview.animating.get()
 
     def _onkey(self, event):
         if event.keysym == "Left":
@@ -132,7 +136,7 @@ class ImageFrame(tix.Frame):
 
     def toggleanimation(self):
         if self.framecount > 1:
-            self.image.animating.set(not self.isanimating)
+            self.imageview.animating.set(not self.isanimating)
 
     def _onframechanged(self):
         self.firstbutton.config(state=_get_button_state(self.currentframe > 0))
@@ -143,6 +147,7 @@ class ImageFrame(tix.Frame):
 
     def _onframecountchanged(self):
         self.playbutton.config(state=_get_button_state(self.framecount > 1))
+        self.repeatcheckbox.config(state=_get_button_state(self.framecount > 1))
         if self.framecount > 1:
             self.infolabel.grid()
         else:
