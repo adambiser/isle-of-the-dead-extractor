@@ -8,15 +8,17 @@ import tkinter.ttk as ttk
 from .resources import Resources
 from .imagelabel import ImageLabel
 
+
 def _get_button_state(condition):
     return tix.NORMAL if condition else tix.DISABLED
+
 
 class ImageFrame(tix.Frame):
     """
     A widget that displays an image, information about the image,
     and controls to animate the image or change frames for multi-image files.
     """
-    
+
     def __init__(self, master=None, **options):
         tix.Frame.__init__(self, master, options)
         self.config(borderwidth=0)
@@ -73,16 +75,17 @@ class ImageFrame(tix.Frame):
         # frame number label
         self.frameinfo = tix.StringVar(value='')
         self.infolabel = tix.Label(self, textvariable=self.frameinfo)
-        self.infolabel.grid(row=1,column=2)
+        self.infolabel.grid(row=1, column=2)
         # Image options
         self.repeatcheckbox = tix.Checkbutton(self, text='Repeat', variable=self.imageview.wrapanimation)
         self.repeatcheckbox.grid(row=1, column=0)
-##        self.scale = tix.StringVar(self, value='auto')
+        # self.scale = tix.StringVar(self, value='auto')
         scalechoices = ['auto', 1, 2, 3, 4, 5, 6, 7, 8]
         self.scalecombo = ttk.Combobox(self, values=scalechoices, state='readonly', width=5)
         self.scalecombo.current(self.imageview.fixedscale.get())
-        self.scalecombo.bind('<<ComboboxSelected>>', lambda *args: self.imageview.fixedscale.set(self.scalecombo.current()))
-##        self.scale.trace("w", lambda *args: self.imageview.fixedscale.set(self.scalecombo.current()))
+        self.scalecombo.bind('<<ComboboxSelected>>',
+                             lambda *args: self.imageview.fixedscale.set(self.scalecombo.current()))
+        # self.scale.trace("w", lambda *args: self.imageview.fixedscale.set(self.scalecombo.current()))
         self.scalecombo.grid(row=2, column=0)
         # Configure grid sizing.
         self.grid_rowconfigure(0, weight=1)
@@ -127,7 +130,7 @@ class ImageFrame(tix.Frame):
         elif event.keysym == "End":
             self.gotolast()
         elif event.keysym == "space":
-            self.toggleanimation
+            self.toggleanimation()
 
     def gobackward(self):
         if self.currentframe > 0:
@@ -151,7 +154,7 @@ class ImageFrame(tix.Frame):
         self.firstbutton.config(state=_get_button_state(self.currentframe > 0))
         self.backbutton.config(state=_get_button_state(self.currentframe > 0))
         self.forwardbutton.config(state=_get_button_state(0 <= self.currentframe < self.framecount - 1))
-        self.lastbutton.config(state=_get_button_state(0 <= self.currentframe < self.framecount- 1))
+        self.lastbutton.config(state=_get_button_state(0 <= self.currentframe < self.framecount - 1))
         self.frameinfo.set("Frame {} of {}".format(self.currentframe + 1, self.framecount))
 
     def _onframecountchanged(self):
