@@ -84,6 +84,9 @@ class ImageFrame(tix.Frame):
     def open(self, filename):
         self.image.open(filename)
 
+    def clear(self):
+        self.image.open(None)
+
     @property
     def currentframe(self):
         return self.image.currentframe.get()
