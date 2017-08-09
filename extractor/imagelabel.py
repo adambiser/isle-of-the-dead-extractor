@@ -6,6 +6,7 @@ import tkinter.tix as tix
 import PIL as pil
 from PIL import ImageTk
 
+
 class ImageLabel(tix.Label):
     """
     A widget that displays an image that scales to fill the widget area
@@ -19,7 +20,7 @@ class ImageLabel(tix.Label):
     * animating - the current animation state.
     * fixedscale - the image scale. automatic sizing when 0.
     """
-    
+
     def __init__(self, master=None, cnf={}, **kw):
         tix.Label.__init__(self, master, cnf, **kw)
         self.config(borderwidth=0)
@@ -40,7 +41,7 @@ class ImageLabel(tix.Label):
     def open(self, filename):
         """Opens an image file and preloads its frame(s)."""
         # Reset values
-        self.currentframe.set(-1) # set invalid to force onframechanged to fire.
+        self.currentframe.set(-1)  # set invalid to force onframechanged to fire.
         self.n_frames.set(0)
         self.config(image=[])
         self.animating.set(False)
@@ -61,7 +62,7 @@ class ImageLabel(tix.Label):
             self.n_frames.set(1)
         try:
             self.animation_speed = original.info.get('duration')
-            if not self.animation_speed is None:
+            if self.animation_speed is not None:
                 self.animation_speed = int(self.animation_speed)
         except AttributeError:
             pass
@@ -84,11 +85,12 @@ class ImageLabel(tix.Label):
             # _resize calls this method again so just return after calling it.
             self._resize([])
             return
-        w,h = self.imagesize
+        w, h = self.imagesize
         if w == 0 or h == 0:
             return
         currentimage = self.frames[self.currentframe.get()]
-        self.photoimage = pil.ImageTk.PhotoImage(currentimage.resize(self.imagesize, self.imagefilter)) # keep a reference!
+        self.photoimage = pil.ImageTk.PhotoImage(
+            currentimage.resize(self.imagesize, self.imagefilter))  # keep a reference!
         self.config(image=self.photoimage)
 
     def _resize(self, *args):
@@ -96,7 +98,7 @@ class ImageLabel(tix.Label):
         if self.currentframe.get() == -1:
             return
         currentimage = self.frames[self.currentframe.get()]
-        w,h = currentimage.size
+        w, h = currentimage.size
         if self.fixedscale.get() == 0:
             imagescale = min(self.winfo_width() / float(w), self.winfo_height() / float(h))
         else:
