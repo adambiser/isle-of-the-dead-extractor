@@ -17,13 +17,16 @@ class ImageLabel(tix.Label):
     * currentframe - contains a number from 0 to n_frames or -1 if no image is displayed
     * n_frames - the number of frames in the image.
     * animating - the current animation state.
+    * fixedscale - the image scale. automatic sizing when 0.
     """
     
     def __init__(self, master=None, cnf={}, **kw):
         tix.Label.__init__(self, master, cnf, **kw)
         self.config(borderwidth=0)
         self.config(background="#333")
+        self.fixedscale = tix.IntVar(value=1)
         self.animating = tix.BooleanVar(value=False)
+        self.wrapanimation = tix.BooleanVar(value=False)
         self.animation_speed = None
         self.frames = None
         self.imagesize = None
@@ -32,6 +35,7 @@ class ImageLabel(tix.Label):
         self.bind("<Configure>", self._resize)
         self.currentframe.trace("w", self._onframechanged)
         self.animating.trace("w", self._onanimatingchanged)
+        self.fixedscale.trace("w", self._resize)
 
     def open(self, filename):
         """Opens an image file and preloads its frame(s)."""
@@ -93,7 +97,10 @@ class ImageLabel(tix.Label):
             return
         currentimage = self.frames[self.currentframe.get()]
         w,h = currentimage.size
-        imagescale = min(self.winfo_width() / float(w), self.winfo_height() / float(h))
+        if self.fixedscale.get() == 0:
+            imagescale = min(self.winfo_width() / float(w), self.winfo_height() / float(h))
+        else:
+            imagescale = self.fixedscale.get()
         self.imagefilter = pil.Image.NEAREST if imagescale >= 1 else pil.Image.BICUBIC
         self.imagesize = (int(w * imagescale), int(h * imagescale))
         self._onframechanged()
@@ -102,8 +109,11 @@ class ImageLabel(tix.Label):
         if not self.animating.get():
             return
         if index >= self.n_frames.get():
-            self.animating.set(False)
-            return
+            if self.wrapanimation.get():
+                index = 0
+            else:
+                self.animating.set(False)
+                return
         self.currentframe.set(index)
         self.after(self.animation_speed, self._animate, index + 1)
 
