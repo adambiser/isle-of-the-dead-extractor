@@ -1,6 +1,9 @@
 # Ignore input folder
 input/
 
+# Ignore config file
+config.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
