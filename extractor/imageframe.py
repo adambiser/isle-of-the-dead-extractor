@@ -3,6 +3,7 @@
 #
 
 import tkinter.tix as tix
+import tkinter.ttk as ttk
 
 from .resources import Resources
 from .imagelabel import ImageLabel
@@ -76,9 +77,17 @@ class ImageFrame(tix.Frame):
         # Image options
         self.repeatcheckbox = tix.Checkbutton(self, text='Repeat', variable=self.imageview.wrapanimation)
         self.repeatcheckbox.grid(row=1, column=0)
+##        self.scale = tix.StringVar(self, value='auto')
+        scalechoices = ['auto', 1, 2, 3, 4, 5, 6, 7, 8]
+        self.scalecombo = ttk.Combobox(self, values=scalechoices, state='readonly', width=5)
+        self.scalecombo.current(self.imageview.fixedscale.get())
+        self.scalecombo.bind('<<ComboboxSelected>>', lambda *args: self.imageview.fixedscale.set(self.scalecombo.current()))
+##        self.scale.trace("w", lambda *args: self.imageview.fixedscale.set(self.scalecombo.current()))
+        self.scalecombo.grid(row=2, column=0)
         # Configure grid sizing.
         self.grid_rowconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=0)
+        self.grid_rowconfigure(2, weight=0)
         self.grid_columnconfigure(0, weight=1, uniform='side')
         self.grid_columnconfigure(1, weight=0)
         self.grid_columnconfigure(2, weight=1, uniform='side')
