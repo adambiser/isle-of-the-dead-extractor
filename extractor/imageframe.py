@@ -2,9 +2,10 @@
 # A widget to view images complete with navigation buttons, etc.
 #
 
-from .Resources import Resources
 import tkinter.tix as tix
-from .ImageLabel import ImageLabel
+
+from .resources import Resources
+from .imagelabel import ImageLabel
 
 def _get_button_state(condition):
     return tix.NORMAL if condition else tix.DISABLED

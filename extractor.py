@@ -1,4 +1,4 @@
-import extractor.ui.MainApplication as ui
+import extractor.main as ui
 
 def main():
     root = ui.MainApplication()
