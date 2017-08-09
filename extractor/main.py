@@ -1,12 +1,11 @@
 import os
 import tkinter.tix as tix
 import tkinter.ttk as ttk
-import PIL as pil
-from PIL import Image,ImageTk
 
 from .pil import CelImagePlugin
 from .imageframe import ImageFrame
 from .settings import Settings
+
 
 class MainApplication(tix.Tk):
     def __init__(self, screenName=None, baseName=None, className='Tix'):
@@ -67,7 +66,7 @@ class MainApplication(tix.Tk):
         if path is None:
             return
         for root, dirnames, filenames in os.walk(path):
-            root = os.path.relpath(root, path)#.replace("\\", "/")
+            root = os.path.relpath(root, path)
             addedfolder = False
             for filename in filenames:
                 if filename.lower().endswith(self._supportedextensions):
