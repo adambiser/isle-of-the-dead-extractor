@@ -5,6 +5,7 @@
 import tkinter.tix as tix
 import PIL as pil
 from PIL import ImageTk
+from tkinter import messagebox
 
 
 class ImageLabel(tix.Label):
@@ -51,7 +52,11 @@ class ImageLabel(tix.Label):
         if filename is None:
             return
         # Load image.
-        original = pil.Image.open(filename)
+        try:
+            original = pil.Image.open(filename)
+        except IOError as ex:
+            messagebox.showerror("I/O Error", ex)
+            return
         try:
             n_frames = original.n_frames
             # FLIC animation always has an extra "ring" frame at the end for looping.
