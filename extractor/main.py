@@ -27,10 +27,21 @@ class MainApplication(tix.Tk):
         # Menu
         menubar = tix.Menu(self)
         self.config(menu=menubar)
+        # File menu
         filemenu = tix.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="File", underline=0, menu=filemenu)
         filemenu.add_command(label="Open Folder", underline=0, command=self._choosefolder, accelerator="Ctrl+O")
         self.bind_all("<Control-o>", lambda *args: self._choosefolder())
+        # Option menu
+        optionsmenu = tix.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Options", underline=0, menu=optionsmenu)
+        optionsmenu.add_checkbutton(label="Loop Animations", underline=0, variable=self.settings.repeatanimations)
+        scalemenu = tix.Menu(menubar, tearoff=0)
+        optionsmenu.add_cascade(label="Image Scale", underline=0, menu=scalemenu)
+        scalemenu.add_radiobutton(label="Auto", underline=0, variable=self.settings.imagescale, value=0)
+        for x in range(1, 8):
+            scalemenu.add_radiobutton(label=str(x), underline=0, variable=self.settings.imagescale, value=x)
+        optionsmenu.add_checkbutton(label="Save Animations as GIF", underline=19)
         # Treeview
         scrolltree = ScrollTreeView(self)
         self.tree = scrolltree.tree
@@ -48,10 +59,8 @@ class MainApplication(tix.Tk):
         self.focus_force()
         self._supportedextensions = ('.cel', '.fli')
         self.settings.gamefolder.trace("w", lambda *args: self._loadtreeview())
-        self.imageviewer.imageview.repeatanimations.set(self.settings.repeatanimations.get())
-        self.imageviewer.imageview.repeatanimations.trace("w", lambda *args: self.settings.repeatanimations.set(self.imageviewer.imageview.repeatanimations.get()))
-        self.imageviewer.imageview.imagescale.set(self.settings.imagescale.get())
-        self.imageviewer.imageview.imagescale.trace("w", lambda *args: self.settings.imagescale.set(self.imageviewer.imageview.imagescale.get()))
+        self.settings.repeatanimations.trace("w", lambda  *args: self.imageviewer.repeatanimations.set(self.settings.repeatanimations.get()))
+        self.settings.imagescale.trace("w", lambda  *args: self.imageviewer.imagescale.set(self.settings.imagescale.get()))
         # Force the initial load.
         self._loadtreeview()
 
