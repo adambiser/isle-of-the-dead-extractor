@@ -6,6 +6,7 @@ from tkinter import filedialog
 from .pil import CelImagePlugin
 from .imageframe import ImageFrame
 from .settings import Settings
+from .scrolltreeview import ScrollTreeView
 
 
 def _allparentpaths(path):
@@ -31,17 +32,18 @@ class MainApplication(tix.Tk):
         filemenu.add_command(label="Open Folder", underline=0, command=self._choosefolder, accelerator="Ctrl+O")
         self.bind_all("<Control-o>", lambda *args: self._choosefolder())
         # Treeview
-        self.tree = ttk.Treeview(self)
-        self.tree.heading('#0', text='Files')
+        scrolltree = ScrollTreeView(self)
+        self.tree = scrolltree.tree
+        self.tree.heading('#0', text='Files', anchor='w')
         self.tree.bind('<<TreeviewSelect>>', lambda *args: self._ontreeviewselect())
         self.tree.bind('<Double-Button-1>', lambda *args: self._playanimation())
-        self.tree.pack(side='left', fill='y')
+        scrolltree.pack(side='left', fill='y')
         # Image viewer
         self.imageviewer = ImageFrame(self)
         self.imageviewer.pack(expand=True, fill='both', padx=0, pady=0, ipadx=0, ipady=0)
         # Finish window
-        self.minsize(750, 500)
-        self._centerwindow(750, 500)
+        self.minsize(800, 500)
+        self._centerwindow(800, 500)
         # Added focus_force because Balloon widgets mess with focus.
         self.focus_force()
         self._supportedextensions = ('.cel', '.fli')
