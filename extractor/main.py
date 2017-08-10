@@ -1,6 +1,7 @@
 import os
 import tkinter.tix as tix
 import tkinter.ttk as ttk
+from tkinter import filedialog
 
 from .pil import CelImagePlugin
 from .imageframe import ImageFrame
@@ -14,6 +15,13 @@ class MainApplication(tix.Tk):
         self.title('Isle of the Dead Graphics Extractor')
         self.settings = Settings()
         self.protocol("WM_DELETE_WINDOW", self._onclosing)
+        # Menu
+        menubar = tix.Menu(self)
+        self.config(menu=menubar)
+        filemenu = tix.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="File", underline=0, menu=filemenu)
+        filemenu.add_command(label="Open Folder", underline=0, command=self._openfolder, accelerator="Ctrl+O")
+        self.bind_all("<Control-o>", lambda *args: self._openfolder())
         # Treeview
         self.tree = ttk.Treeview(self)
         self.tree.heading('#0', text='Files')
@@ -65,16 +73,29 @@ class MainApplication(tix.Tk):
         self.geometry('{}x{}+{}+{}'.format(width, height, x, y))
 
     def _loadtreeview(self):
+        self.imageviewer.clear()
         self.tree.delete(*self.tree.get_children())
         path = self.gamefolder
         if path is None:
             return
         for root, dirnames, filenames in os.walk(path):
             root = os.path.relpath(root, path)
+            if root == ".":
+                root = ""
             addedfolder = False
             for filename in filenames:
                 if filename.lower().endswith(self._supportedextensions):
-                    if not addedfolder:
+                    if not addedfolder and root:
+                        print("root: " + root)
                         self.tree.insert('', 'end', iid=root, text=root, open=False)
                         addedfolder = True
                     self.tree.insert(root, 'end', iid=os.path.join(root, filename), text=filename)
+
+    def _openfolder(self):
+        options = {
+            "title": "Select the game folder",
+            "initialdir": self.settings.gamefolder.get(),
+        }
+        newpath = filedialog.askdirectory(**options)
+        if newpath:
+            self.settings.gamefolder.set(newpath),
