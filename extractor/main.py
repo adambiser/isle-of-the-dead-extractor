@@ -8,6 +8,14 @@ from .imageframe import ImageFrame
 from .settings import Settings
 
 
+def _allparentpaths(path):
+    paths = []
+    while len(path):
+        paths.insert(0, path)
+        path = os.path.dirname(path)
+    return paths
+
+
 class MainApplication(tix.Tk):
     def __init__(self, screenName=None, baseName=None, className='Tix'):
         # Set up the window.
@@ -75,21 +83,28 @@ class MainApplication(tix.Tk):
     def _loadtreeview(self):
         self.imageviewer.clear()
         self.tree.delete(*self.tree.get_children())
-        path = self.gamefolder
-        if path is None:
+        gamefolder = self.gamefolder
+        if gamefolder is None:
             return
-        for root, dirnames, filenames in os.walk(path):
-            root = os.path.relpath(root, path)
+        addedfolders = []
+        files = []
+        for root, dirnames, filenames in os.walk(gamefolder):
+            root = os.path.relpath(root, gamefolder)
             if root == ".":
                 root = ""
-            addedfolder = False
             for filename in filenames:
                 if filename.lower().endswith(self._supportedextensions):
-                    fullpath=os.path.join(root, filename)
-                    if not addedfolder and root:
-                        self.tree.insert('', 'end', iid=root, text=root, open=False)
-                        addedfolder = True
-                    self.tree.insert(root, 'end', iid=fullpath, text=filename)
+                    if root and root not in addedfolders:
+                        lastpath = ""
+                        for path in _allparentpaths(root):
+                            if path not in addedfolders:
+                                self.tree.insert(lastpath, "end", iid=path, text=os.path.basename(path), open=False)
+                                addedfolders.append(path)
+                            lastpath = path
+                    files.append(os.path.join(root, filename))
+        for fullpath in files:
+            root, filename = os.path.split(fullpath)
+            self.tree.insert(root, 'end', iid=fullpath, text=filename)
 
     def _choosefolder(self):
         options = {
