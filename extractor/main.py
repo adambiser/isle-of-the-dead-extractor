@@ -20,8 +20,8 @@ class MainApplication(tix.Tk):
         self.config(menu=menubar)
         filemenu = tix.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="File", underline=0, menu=filemenu)
-        filemenu.add_command(label="Open Folder", underline=0, command=self._openfolder, accelerator="Ctrl+O")
-        self.bind_all("<Control-o>", lambda *args: self._openfolder())
+        filemenu.add_command(label="Open Folder", underline=0, command=self._choosefolder, accelerator="Ctrl+O")
+        self.bind_all("<Control-o>", lambda *args: self._choosefolder())
         # Treeview
         self.tree = ttk.Treeview(self)
         self.tree.heading('#0', text='Files')
@@ -85,13 +85,13 @@ class MainApplication(tix.Tk):
             addedfolder = False
             for filename in filenames:
                 if filename.lower().endswith(self._supportedextensions):
+                    fullpath=os.path.join(root, filename)
                     if not addedfolder and root:
-                        print("root: " + root)
                         self.tree.insert('', 'end', iid=root, text=root, open=False)
                         addedfolder = True
-                    self.tree.insert(root, 'end', iid=os.path.join(root, filename), text=filename)
+                    self.tree.insert(root, 'end', iid=fullpath, text=filename)
 
-    def _openfolder(self):
+    def _choosefolder(self):
         options = {
             "title": "Select the game folder",
             "initialdir": self.settings.gamefolder.get(),
