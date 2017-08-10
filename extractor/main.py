@@ -24,12 +24,16 @@ class MainApplication(tix.Tk):
         self.imageviewer = ImageFrame(self)
         self.imageviewer.pack(expand=True, fill='both', padx=0, pady=0, ipadx=0, ipady=0)
         # Finish window
-        self.minsize(700, 500)
-        self._centerwindow(700, 500)
+        self.minsize(750, 500)
+        self._centerwindow(750, 500)
         # Added focus_force because Balloon widgets mess with focus.
         self.focus_force()
         self._supportedextensions = ('.cel', '.fli')
         self.settings.gamefolder.trace("w", lambda *args: self._loadtreeview())
+        self.imageviewer.imageview.repeatanimations.set(self.settings.repeatanimations.get())
+        self.imageviewer.imageview.repeatanimations.trace("w", lambda *args: self.settings.repeatanimations.set(self.imageviewer.imageview.repeatanimations.get()))
+        self.imageviewer.imageview.imagescale.set(self.settings.imagescale.get())
+        self.imageviewer.imageview.imagescale.trace("w", lambda *args: self.settings.imagescale.set(self.imageviewer.imageview.imagescale.get()))
         # Force the initial load.
         self._loadtreeview()
 

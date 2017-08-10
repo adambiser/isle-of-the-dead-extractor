@@ -25,9 +25,9 @@ class ImageLabel(tix.Label):
         tix.Label.__init__(self, master, cnf, **kw)
         self.config(borderwidth=0)
         self.config(background="#333")
-        self.fixedscale = tix.IntVar(value=1)
+        self.imagescale = tix.IntVar(value=0)
         self.animating = tix.BooleanVar(value=False)
-        self.wrapanimation = tix.BooleanVar(value=False)
+        self.repeatanimations = tix.BooleanVar(value=False)
         self.animation_speed = None
         self.frames = None
         self.imagesize = None
@@ -36,7 +36,7 @@ class ImageLabel(tix.Label):
         self.bind("<Configure>", self._resize)
         self.currentframe.trace("w", self._onframechanged)
         self.animating.trace("w", self._onanimatingchanged)
-        self.fixedscale.trace("w", self._resize)
+        self.imagescale.trace("w", self._resize)
 
     def open(self, filename):
         """Opens an image file and preloads its frame(s)."""
@@ -99,10 +99,10 @@ class ImageLabel(tix.Label):
             return
         currentimage = self.frames[self.currentframe.get()]
         w, h = currentimage.size
-        if self.fixedscale.get() == 0:
+        if self.imagescale.get() == 0:
             imagescale = min(self.winfo_width() / float(w), self.winfo_height() / float(h))
         else:
-            imagescale = self.fixedscale.get()
+            imagescale = self.imagescale.get()
         self.imagefilter = pil.Image.NEAREST if imagescale >= 1 else pil.Image.BICUBIC
         self.imagesize = (int(w * imagescale), int(h * imagescale))
         self._onframechanged()
@@ -111,7 +111,7 @@ class ImageLabel(tix.Label):
         if not self.animating.get():
             return
         if index >= self.n_frames.get():
-            if self.wrapanimation.get():
+            if self.repeatanimations.get():
                 index = 0
             else:
                 self.animating.set(False)

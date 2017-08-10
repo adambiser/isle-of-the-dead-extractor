@@ -77,16 +77,22 @@ class ImageFrame(tix.Frame):
         self.infolabel = tix.Label(self, textvariable=self.frameinfo)
         self.infolabel.grid(row=1, column=2)
         # Image options
-        self.repeatcheckbox = tix.Checkbutton(self, text='Repeat', variable=self.imageview.wrapanimation)
-        self.repeatcheckbox.grid(row=1, column=0)
-        # self.scale = tix.StringVar(self, value='auto')
+        optionsframe = tix.Frame(self)
+        optionsframe.grid(row=1, column=0)
+        # repeat checkbox
+        self.repeatcheckbox = tix.Checkbutton(optionsframe, text='Repeat animations', variable=self.imageview.repeatanimations)
+        self.repeatcheckbox.grid(row=0, column=0, columnspan=2)
+        # scale label
+        scalelabel = tix.Label(optionsframe, text="Image scale:")
+        scalelabel.grid(row=1, column=0)
+        # scale combo
         scalechoices = ['auto', 1, 2, 3, 4, 5, 6, 7, 8]
-        self.scalecombo = ttk.Combobox(self, values=scalechoices, state='readonly', width=5)
-        self.scalecombo.current(self.imageview.fixedscale.get())
+        self.scalecombo = ttk.Combobox(optionsframe, values=scalechoices, state='readonly', width=5)
+        self.scalecombo.current(self.imageview.imagescale.get())
         self.scalecombo.bind('<<ComboboxSelected>>',
-                             lambda *args: self.imageview.fixedscale.set(self.scalecombo.current()))
+                             lambda *args: self.imageview.imagescale.set(self.scalecombo.current()))
         # self.scale.trace("w", lambda *args: self.imageview.fixedscale.set(self.scalecombo.current()))
-        self.scalecombo.grid(row=2, column=0)
+        self.scalecombo.grid(row=1, column=1)
         # Configure grid sizing.
         self.grid_rowconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=0)
@@ -159,7 +165,7 @@ class ImageFrame(tix.Frame):
 
     def _onframecountchanged(self):
         self.playbutton.config(state=_get_button_state(self.framecount > 1))
-        self.repeatcheckbox.config(state=_get_button_state(self.framecount > 1))
+        # self.repeatcheckbox.config(state=_get_button_state(self.framecount > 1))
         if self.framecount > 1:
             self.infolabel.grid()
         else:

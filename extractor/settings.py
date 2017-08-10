@@ -11,31 +11,37 @@ def _get_verify_dir(settings, name, default_path):
 
 
 class Settings:
-    CONFIG_FILE = 'config.json'
+    CONFIG_FILE = "config.json"
 
     def __init__(self):
         self.gamefolder = tk.StringVar(value=None)
         self.exportfolder = tk.StringVar(value=os.getcwd())
+        self.repeatanimations = tk.BooleanVar(value=False)
+        self.imagescale = tk.IntVar(value=0)
         self.load()
 
     def load(self):
         if os.path.exists(Settings.CONFIG_FILE):
-            with open(Settings.CONFIG_FILE, 'r') as f:
+            with open(Settings.CONFIG_FILE, "r") as f:
                 self._fromdict(json.load(f))
 
     def save(self):
-        with open(Settings.CONFIG_FILE, 'w') as f:
-            json.dump(self._todict(), f, indent=4, separators=(',', ': '))
+        with open(Settings.CONFIG_FILE, "w") as f:
+            json.dump(self._todict(), f, indent=4, separators=(",", ": "))
 
     def _todict(self):
         settings = {
-            'gamefolder': self.gamefolder.get(),
-            'exportfolder': self.exportfolder.get()
+            "gamefolder": self.gamefolder.get(),
+            "exportfolder": self.exportfolder.get(),
+            "repeatanimations": self.repeatanimations.get(),
+            "imagescale": self.imagescale.get(),
         }
         return settings
 
     def _fromdict(self, settings):
         # Be sure to use .set so that the value updates and
-        # the variable reference doesn't change.
-        self.gamefolder.set(_get_verify_dir(settings, 'gamefolder', None))
-        self.exportfolder.set(_get_verify_dir(settings, 'exportfolder', os.getcwd()))
+        # the variable reference doesn"t change.
+        self.gamefolder.set(_get_verify_dir(settings, "gamefolder", None))
+        self.exportfolder.set(_get_verify_dir(settings, "exportfolder", os.getcwd()))
+        self.repeatanimations.set(settings.get("repeatanimations", False))
+        self.imagescale.set(settings.get("imagescale", 0))
