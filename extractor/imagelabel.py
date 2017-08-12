@@ -4,7 +4,7 @@
 
 import tkinter.tix as tix
 import PIL as pil
-from PIL import ImageTk
+from PIL import ImageTk, FliImagePlugin
 from tkinter import messagebox
 
 
@@ -60,7 +60,7 @@ class ImageLabel(tix.Label):
         try:
             n_frames = original.n_frames
             # FLIC animation always has an extra "ring" frame at the end for looping.
-            if type(original) is pil.FliImagePlugin.FliImageFile:
+            if isinstance(original, FliImagePlugin.FliImageFile):
                 n_frames -= 1
             self.n_frames.set(n_frames)
         except AttributeError:
