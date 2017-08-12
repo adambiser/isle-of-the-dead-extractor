@@ -52,8 +52,11 @@ class CelImageFile(ImageFile.ImageFile):
         # There should be a PALETTE.PAL file in the same folder as the image file.
         palfile = os.path.join(os.path.dirname(self.filename), "PALETTE.PAL")
         if not os.path.isfile(palfile):
-            # This is a hard error to stop Image from trying other file formats.
-            raise IOError("Could not find PALETTE.PAL.")
+            # check one director up for the palette file
+            palfile = os.path.join(os.path.dirname(os.path.dirname(self.filename)), "PALETTE.PAL")
+            if not os.path.isfile(palfile):
+                # This is a hard error to stop Image from trying other file formats.
+                raise IOError("Could not find PALETTE.PAL.")
         with open(palfile, "rb") as f:
             self.loadvgapalette(f)
 
