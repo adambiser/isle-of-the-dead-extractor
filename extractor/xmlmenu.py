@@ -39,7 +39,6 @@ class XmlMenu:
         "?": "question",
     }
 
-
     def __init__(self, master, filename, globals, locals):
         self.globals = globals
         self.locals = locals
@@ -48,7 +47,6 @@ class XmlMenu:
         parentmenu = tk.Menu(master, tearoff=0, name="menubar")
         master.config(menu=parentmenu)
         self._loadchildren(master, parentmenu, tree)
-
 
     def _safeeval(self, _node, _key, _default=None):
         required = _key.startswith("*")
@@ -65,7 +63,6 @@ class XmlMenu:
                 raise Exception("Node is missing a required attribute. {}.{}".format(_node.tag, _key))
             return _default
         return _value
-
 
     def _loadchildren(self, master, _parentmenu, _parentnode):
         for _node in _parentnode:
@@ -99,18 +96,7 @@ class XmlMenu:
                 # Add binding to match accelerator key.
                 eventname = self._getbindevent(_node)
                 if eventname:
-                    if _args.get("command") is not None:
-                        master.bind_all(eventname, lambda *args, _args=_args: _args.get("command")())
-                    elif _args.get("variable"):
-                        if _args.get("value"):  # radio button
-                            master.bind_all(eventname,
-                                            lambda *args, _args=_args:
-                                            _args.get("variable").set(_args.get("value")))
-                        else:  # check button
-                            master.bind_all(eventname,
-                                            lambda *args, _args=_args:
-                                            _args.get("variable").set(not _args.get("variable").get()))
-
+                    master.bind_all(eventname, lambda *args, _label=_label: _parentmenu.invoke(_label))
 
     def _parselabel(self, _node):
         _label = _node.get("label")
@@ -125,7 +111,6 @@ class XmlMenu:
             _name = None
             _underline = None
         return _label, _underline, _name
-
 
     def _getbindevent(self, _node):
         event = _node.get("bind")
