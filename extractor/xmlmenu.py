@@ -71,9 +71,10 @@ class XmlMenu:
         for _node in _parentnode:
             _label, _underline, _name = self._parselabel(_node)
             _args = {"tearoff":_node.get("tearoff", 0)}
-            _menuitem = tk.Menu(_parentmenu, name=_name, **_args)
             if _node:
+                _menuitem = tk.Menu(_parentmenu, name=_name, **_args)
                 _parentmenu.add_cascade(label=_label, underline=_underline, menu=_menuitem)
+                _parentmenu.entryconfig(_label, state=_node.get("state", 'normal'))
                 self._loadchildren(master, _menuitem, _node)
             else:
                 _menutype = _node.tag
@@ -93,6 +94,7 @@ class XmlMenu:
                     raise Exception("Unsupported menutype: " + _menutype)
                 _args = { _arg[1:] if _arg.startswith("*") else _arg: self._safeeval(_node, _arg) for _arg in _arglist}
                 _args["accelerator"] = _node.get("accelerator")
+                _args["state"] = _node.get("state", "normal")
                 _addmethod(label=_label, underline=_underline, **_args)
                 # Add binding to match accelerator key.
                 eventname = self._getbindevent(_node)
@@ -151,6 +153,17 @@ class XmlMenu:
             return "<" + event + ">"
         else:
             return None
+
+    @classmethod
+    def findmenu(cls, master, path):
+        if not isinstance(path, list):
+            path = path.split("/")
+        if path[0] != "menubar":
+            path.insert(0, "menubar")
+        parent = master
+        for child in path:
+            parent = parent.children.get(child)
+        return parent
 
 
 def _findandreplace(string, findstring, replacestring=""):
