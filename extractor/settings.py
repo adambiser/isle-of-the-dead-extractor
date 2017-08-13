@@ -18,7 +18,9 @@ class Settings:
         self.exportfolder = tk.StringVar(value=os.getcwd())
         self.repeatanimations = tk.BooleanVar(value=False)
         self.imagescale = tk.IntVar(value=0)
-        self.load()
+        self.saveimagefiletype = tk.StringVar(value="")
+        self.saveanimationfiletype = tk.StringVar(value="")
+        # self.load()
 
     def load(self):
         if os.path.exists(Settings.CONFIG_FILE):
@@ -35,6 +37,8 @@ class Settings:
             "exportfolder": self.exportfolder.get(),
             "repeatanimations": self.repeatanimations.get(),
             "imagescale": self.imagescale.get(),
+            'saveimagefiletype': self.saveimagefiletype.get(),
+            'saveanimationfiletype': self.saveanimationfiletype.get(),
         }
         return settings
 
@@ -45,3 +49,5 @@ class Settings:
         self.exportfolder.set(_get_verify_dir(settings, "exportfolder", os.getcwd()))
         self.repeatanimations.set(settings.get("repeatanimations", False))
         self.imagescale.set(settings.get("imagescale", 0))
+        self.saveimagefiletype.set(settings.get("saveimagefiletype", ""))
+        self.saveanimationfiletype.set(settings.get("saveanimationfiletype", ""))
