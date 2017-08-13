@@ -3,7 +3,8 @@
 #
 
 import tkinter.tix as tix
-from PIL import Image, ImageTk  #, FliImagePlugin
+import PIL
+from PIL import Image, ImageTk, FliImagePlugin
 from tkinter import messagebox
 
 
@@ -18,7 +19,8 @@ class ImageLabel(tix.Label):
     * currentframe - contains a number from 0 to n_frames or -1 if no image is displayed
     * n_frames - the number of frames in the image.
     * animating - the current animation state.
-    * fixedscale - the image scale. automatic sizing when 0.
+    * repeatanimations - boolean to toggle animation looping
+    * imagescale - the image scale. automatic sizing when 0.
     """
 
     def __init__(self, master=None, cnf={}, **kw):
@@ -60,8 +62,8 @@ class ImageLabel(tix.Label):
         try:
             n_frames = self.image.n_frames
             # FLIC animation always has an extra "ring" frame at the end for looping.
-            # if isinstance(self.image, FliImagePlugin.FliImageFile):
-            #     n_frames -= 1
+            if isinstance(self.image, FliImagePlugin.FliImageFile) and PIL.__version__ < "4.3":
+                n_frames -= 1
             self.n_frames.set(n_frames)
         except AttributeError:
             self.n_frames.set(1)

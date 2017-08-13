@@ -146,15 +146,24 @@ class ImageFrame(tix.Frame):
         self.backbutton.config(state=_get_button_state(self.currentframe > 0))
         self.forwardbutton.config(state=_get_button_state(0 <= self.currentframe < self.framecount - 1))
         self.lastbutton.config(state=_get_button_state(0 <= self.currentframe < self.framecount - 1))
-        self.frameinfo.set("Frame {} of {}".format(self.currentframe + 1, self.framecount))
+        if self.framecount >= 1:
+            if self.framecount > 1:
+                self.frameinfo.set("Size {} x {}\nFrame {} of {}".
+                                   format(self.imageview.currentframeimage.width, self.imageview.currentframeimage.height,
+                                          self.currentframe + 1, self.framecount))
+            else:
+                self.frameinfo.set("Size {} x {}".
+                                   format(self.imageview.currentframeimage.width, self.imageview.currentframeimage.height))
+        else:
+            self.frameinfo.set("")
 
     def _onframecountchanged(self):
         self.playbutton.config(state=_get_button_state(self.framecount > 1))
         # self.repeatcheckbox.config(state=_get_button_state(self.framecount > 1))
-        if self.framecount > 1:
-            self.infolabel.grid()
-        else:
-            self.infolabel.grid_remove()
+        # if self.framecount > 1:
+        #     self.infolabel.grid()
+        # else:
+        #     self.infolabel.grid_remove()
 
     def _onanimating(self):
         self.playbutton.image = Resources.getimage('stop.png' if self.isanimating else 'play.png')

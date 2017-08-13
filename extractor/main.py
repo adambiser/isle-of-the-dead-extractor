@@ -1,9 +1,10 @@
 import os
+import PIL
 import tkinter as tk
 import tkinter.tix as tix
 import tkinter.ttk as ttk
 from tkinter import filedialog, messagebox
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, FliImagePlugin
 
 from .pil import CelImagePlugin, PakImagePlugin
 from .imageframe import ImageFrame
@@ -157,6 +158,8 @@ class MainApplication(tix.Tk):
                             image.load()
                             try:
                                 n_frames = image.n_frames
+                                if isinstance(self.image, FliImagePlugin.FliImageFile) and PIL.__version__ < "4.3":
+                                    n_frames -= 1
                             except AttributeError:
                                 n_frames = 1
                             if n_frames > 1:
