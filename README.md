@@ -1,6 +1,7 @@
 # Isle of the Dead Extractor
 
 This project extracts the graphics for the DOS game Isle of the Dead.
+Both versions of the game are supported.
 
 ## Getting Started
 
@@ -25,4 +26,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgements
 
+* [Pillow](https://github.com/python-pillow/Pillow)
 * [Kenney.nl](https://opengameart.org/content/game-icons) for the button icons. (CC0 License)
