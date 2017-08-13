@@ -32,13 +32,15 @@ class MainApplication(tix.Tk):
         # Menu
         XmlMenu(self, os.path.join(Resources.PATH, "mainmenu.xml"), globals(), locals())
         self.filemenu = XmlMenu.findmenu(self, "file")
+        # status bar
+        self.statusbar = tix.Label(self, borderwidth=1, relief='sunken', anchor='w')
+        self.statusbar.pack(side='bottom', fill='x')
         # Treeview
         scrolltree = ScrollTreeView(self)
         self.tree = scrolltree.tree
         self.tree.heading('#0', text='Files', anchor='w')
         self.tree.bind('<<TreeviewSelect>>', lambda *args: self._ontreeviewselect())
         self.tree.bind('<Double-Button-1>', lambda *args: self._playanimation())
-        # self.tree.bind('<Button-3>', lambda *args: print("right click"))
         scrolltree.pack(side='left', fill='y')
         # Image viewer
         self.imageviewer = ImageFrame(self)
@@ -70,6 +72,10 @@ class MainApplication(tix.Tk):
         self.settings.save()
         self.destroy()
 
+    def setstatus(self, text):
+        self.statusbar.config(text=text)
+        self.update_idletasks()
+
     def _saveimageas(self):
         options = {
             "title": "Save Image As",
@@ -89,6 +95,7 @@ class MainApplication(tix.Tk):
         if filename:
             self.imageviewer.imageview.currentframeimage.save(filename)
             self.settings.exportfolder.set(os.path.dirname(filename))
+            self.setstatus("Saved: " + filename)
 
     def _saveanimationas(self):
         options = {
@@ -108,12 +115,14 @@ class MainApplication(tix.Tk):
         if filename:
             if "Animated" in options["typevariable"].get():
                 self.imageviewer.imageview.image.save(filename, save_all=True)
+                self.setstatus("Saved: " + filename)
             else:
                 filename, ext = os.path.splitext(filename)
                 width = len(str(self.imageviewer.imageview.n_frames.get()))
                 for f in range(self.imageviewer.imageview.n_frames.get()):
                     framefile = filename + "-{0:0{width}}".format(f, width=width) + ext
                     self.imageviewer.imageview.frames[f].save(framefile)
+                    self.setstatus("Saved: " + framefile)
             self.settings.exportfolder.set(os.path.dirname(filename))
 
     def _saveall(self):
@@ -151,13 +160,15 @@ class MainApplication(tix.Tk):
                             except AttributeError:
                                 n_frames = 1
                             if n_frames > 1:
-                                image.save(outfilebase + ".gif", save_all=True)
+                                outfilebase += ".gif"
+                                image.save(outfilebase , save_all=True)
                             else:
-                                image.save(outfilebase + ".bmp")
+                                outfilebase += ".png"
+                                image.save(outfilebase)
+                            self.setstatus("Saved: " + outfilebase)
                         except Exception as ex:
                             print(ex)
-                        return
-
+            self.setstatus("Done")
 
     def _ontreeviewselect(self):
         selectedpath = os.path.join(self.gamefolder, self.tree.focus())

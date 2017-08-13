@@ -1,5 +1,7 @@
-# Ignore input folder
+old/
+.idea/
 input/
+output/
 
 # Ignore config file
 config.json
