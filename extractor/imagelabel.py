@@ -3,8 +3,7 @@
 #
 
 import tkinter.tix as tix
-import PIL as pil
-from PIL import ImageTk, FliImagePlugin
+from PIL import Image, ImageTk, FliImagePlugin
 from tkinter import messagebox
 
 
@@ -42,6 +41,7 @@ class ImageLabel(tix.Label):
     def open(self, filename):
         """Opens an image file and preloads its frame(s)."""
         # Reset values
+        self.image = None
         self.currentframe.set(-1)  # set invalid to force onframechanged to fire.
         self.n_frames.set(0)
         self.config(image=[])
@@ -53,20 +53,20 @@ class ImageLabel(tix.Label):
             return
         # Load image.
         try:
-            original = pil.Image.open(filename)
+            self.image = Image.open(filename)
         except IOError as ex:
             messagebox.showerror("I/O Error", ex)
             return
         try:
-            n_frames = original.n_frames
+            n_frames = self.image.n_frames
             # FLIC animation always has an extra "ring" frame at the end for looping.
-            if isinstance(original, FliImagePlugin.FliImageFile):
+            if isinstance(self.image, FliImagePlugin.FliImageFile):
                 n_frames -= 1
             self.n_frames.set(n_frames)
         except AttributeError:
             self.n_frames.set(1)
         try:
-            self.animation_speed = original.info.get('duration')
+            self.animation_speed = self.image.info.get('duration')
             if self.animation_speed is not None:
                 self.animation_speed = int(self.animation_speed)
         except AttributeError:
@@ -76,9 +76,9 @@ class ImageLabel(tix.Label):
         # Preload all frames.
         self.frames = []
         for x in range(self.n_frames.get()):
-            original.seek(x)
-            original.load()
-            self.frames.append(original.copy())
+            self.image.seek(x)
+            self.image.load()
+            self.frames.append(self.image.copy())
         # Load first frame.
         self.currentframe.set(0)
 
@@ -94,9 +94,17 @@ class ImageLabel(tix.Label):
         if w == 0 or h == 0:
             return
         currentimage = self.frames[self.currentframe.get()]
-        self.photoimage = pil.ImageTk.PhotoImage(
+        self.photoimage = ImageTk.PhotoImage(
             currentimage.resize(self.imagesize, self.imagefilter))  # keep a reference!
         self.config(image=self.photoimage)
+
+    @property
+    def currentframeimage(self):
+        """
+        Returns the image of the currently selected frame.
+        :rtype: Image.Image
+        """
+        return self.frames[self.currentframe.get()]
 
     def _resize(self, *args):
         """Fires when the widget resizes. Calculates an aspect-corrected scale and size for the images."""
@@ -108,7 +116,7 @@ class ImageLabel(tix.Label):
             imagescale = min(self.winfo_width() / float(w), self.winfo_height() / float(h))
         else:
             imagescale = self.imagescale.get()
-        self.imagefilter = pil.Image.NEAREST if imagescale >= 1 else pil.Image.BICUBIC
+        self.imagefilter = Image.NEAREST if imagescale >= 1 else Image.BICUBIC
         self.imagesize = (int(w * imagescale), int(h * imagescale))
         self._onframechanged()
 
